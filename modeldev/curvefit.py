@@ -5,6 +5,65 @@ import pandas as pd
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 
+########## Ebony's functions (START) ##########
+from models import WB
+def fit_WBmodel(xdata: np.ndarray,
+                ydata: np.ndarray,
+                J0max: int,
+                t0: int,
+                duration: int,
+                TR: int,
+                FA: int,
+                r_bl: int,
+                rh: int,
+                Fp: int,
+                R10Aorta: int,
+                R10Liver: int,
+                R10Kidneys: int,
+                R10Body: int,
+                S0Aorta: int,
+                S0Liver: int,
+                S0Kidneys: int,
+                S0Body: int,
+                params: int,
+                iterations=40,
+                dt=0.1,) -> np.ndarray:
+    """Fits observed data to whole body model."""
+    ftol = 1e-8
+    ptol = 1e-8
+    gtol = 1e-8
+    variables, _ = curve_fit(
+                lambda t_obs, R10Aorta, R10Liver, R10Kidneys, R10Body, S0Aorta, S0Liver, S0Kidneys, S0Body, THLu, Tgut, E1, TeL, Th, Eh, E2, TpG, Tt, Et, Tp, Te, Erb: WB.simulate_signals(t_obs,
+                                                                                                                                                                                           J0max,
+                                                                                                                                                                                           t0,
+                                                                                                                                                                                           duration,
+                                                                                                                                                                                           TR,
+                                                                                                                                                                                           FA,
+                                                                                                                                                                                           r_bl,
+                                                                                                                                                                                           rh,
+                                                                                                                                                                                           Fp,
+                                                                                                                                                                                           R10Aorta,
+                                                                                                                                                                                           R10Liver,
+                                                                                                                                                                                           R10Kidneys,
+                                                                                                                                                                                           R10Body,
+                                                                                                                                                                                           S0Aorta,
+                                                                                                                                                                                           S0Liver,
+                                                                                                                                                                                           S0Kidneys,
+                                                                                                                                                                                           S0Body,
+                                                                                                                                                                                           params,
+                                                                                                                                                                                           iterations=40,
+                                                                                                                                                                                           dt=0.1),
+                    xdata, ydata,
+                    # concat all estimated parameters together for p0
+                    p0=[R10Aorta, R10Liver, R10Kidneys, R10Body] + [S0Aorta, S0Liver, S0Kidneys, S0Body] + list(params.values()),
+                    ftol=0.5,
+                    xtol=1,
+                    gtol=1,
+                    bounds=(0, np.inf))
+
+    return variables
+########## Ebony's functions (END) ##########
+
 class CurveFit():
 
     # optimization settings
